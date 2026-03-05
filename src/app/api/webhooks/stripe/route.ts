@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
-      const { slot_id, court_id, user_id } = session.metadata ?? {}
+      const { slot_id, court_id, user_id, platform_fee } = session.metadata ?? {}
 
       if (!slot_id || !court_id || !user_id) break
 
@@ -34,13 +34,14 @@ export async function POST(request: NextRequest) {
         .update({ status: 'booked', held_until: null })
         .eq('id', slot_id)
 
-      // Create booking record
+      // Create booking record with platform fee
       await supabase.from('bookings').insert({
         user_id,
         court_id,
         slot_id,
         stripe_payment_intent: session.payment_intent as string,
         amount: session.amount_total ?? 0,
+        platform_fee: parseInt(platform_fee ?? '0'),
         status: 'confirmed',
       })
       break
@@ -49,15 +50,62 @@ export async function POST(request: NextRequest) {
     case 'checkout.session.expired': {
       const session = event.data.object as Stripe.Checkout.Session
       const { slot_id } = session.metadata ?? {}
-
       if (!slot_id) break
 
-      // Release the held slot
       await supabase
         .from('time_slots')
         .update({ status: 'available', booked_by: null, held_until: null, stripe_session_id: null })
         .eq('id', slot_id)
         .eq('status', 'held')
+      break
+    }
+
+    case 'payment_intent.payment_failed': {
+      // Find slot by stripe session — release it
+      const pi = event.data.object as Stripe.PaymentIntent
+      const { data: slot } = await supabase
+        .from('time_slots')
+        .select('id')
+        .eq('status', 'held')
+        .limit(1)
+        .single()
+      if (slot) {
+        await supabase
+          .from('time_slots')
+          .update({ status: 'available', booked_by: null, held_until: null, stripe_session_id: null })
+          .eq('id', slot.id)
+      }
+      console.log(`Payment failed for PI: ${pi.id}`)
+      break
+    }
+
+    case 'charge.refunded': {
+      const charge = event.data.object as Stripe.Charge
+      const paymentIntentId = charge.payment_intent as string
+      if (!paymentIntentId) break
+
+      // Find booking by payment intent
+      const { data: booking } = await supabase
+        .from('bookings')
+        .select('id, slot_id')
+        .eq('stripe_payment_intent', paymentIntentId)
+        .single()
+
+      if (booking) {
+        await supabase
+          .from('bookings')
+          .update({
+            status: 'cancelled',
+            refund_amount: charge.amount_refunded,
+          })
+          .eq('id', booking.id)
+
+        // Release slot
+        await supabase
+          .from('time_slots')
+          .update({ status: 'available', booked_by: null, stripe_session_id: null })
+          .eq('id', booking.slot_id)
+      }
       break
     }
 

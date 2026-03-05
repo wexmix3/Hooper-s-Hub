@@ -66,6 +66,9 @@ export interface Booking {
   slot_id: string
   stripe_payment_intent: string | null
   amount: number // cents
+  platform_fee: number // cents
+  refund_amount: number // cents
+  stripe_refund_id: string | null
   status: 'confirmed' | 'cancelled' | 'completed'
   created_at: string
   // Joined

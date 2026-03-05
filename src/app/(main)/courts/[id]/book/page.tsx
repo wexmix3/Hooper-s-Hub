@@ -1,13 +1,39 @@
 'use client'
 
-import { useEffect, useState, use } from 'react'
+import { useEffect, useState, use, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, Calendar, Clock, DollarSign } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, DollarSign, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import type { TimeSlot, Court } from '@/types'
 import { formatDate, formatTime, formatPrice } from '@/lib/utils'
+
+function useCountdown(heldUntil: string | null) {
+  const [secondsLeft, setSecondsLeft] = useState<number>(0)
+  useEffect(() => {
+    if (!heldUntil) return
+    const end = new Date(heldUntil).getTime()
+    const tick = () => setSecondsLeft(Math.max(0, Math.floor((end - Date.now()) / 1000)))
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [heldUntil])
+  return secondsLeft
+}
+
+function CountdownBanner({ heldUntil }: { heldUntil: string | null }) {
+  const secs = useCountdown(heldUntil)
+  if (!heldUntil || secs <= 0) return null
+  const m = Math.floor(secs / 60)
+  const s = secs % 60
+  return (
+    <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold ${secs < 120 ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-amber-50 border border-amber-200 text-amber-700'}`}>
+      <AlertTriangle size={16} className="flex-shrink-0" />
+      Slot held for you — complete payment in {m}:{String(s).padStart(2, '0')}
+    </div>
+  )
+}
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -127,6 +153,8 @@ export default function BookPage({ params }: PageProps) {
             <span className="text-[#FF6B2C]">{formatPrice(total)}</span>
           </div>
         </div>
+
+        {slot.held_until && <CountdownBanner heldUntil={slot.held_until} />}
 
         {error && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">{error}</div>

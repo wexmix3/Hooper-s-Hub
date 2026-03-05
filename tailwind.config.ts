@@ -13,7 +13,9 @@ const config: Config = {
         accent: '#FF6B2C',
       },
       fontFamily: {
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        body: ['var(--font-body)', 'DM Sans', '-apple-system', 'sans-serif'],
+        display: ['var(--font-display)', 'Bricolage Grotesque', 'sans-serif'],
+        sans: ['var(--font-body)', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
     },
   },

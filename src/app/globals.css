@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* Fonts loaded via next/font/google */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -18,7 +18,7 @@
   }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-body), DM Sans, -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: #F8FAFC;
     color: #0F172A;
     overscroll-behavior: none;
@@ -65,4 +65,16 @@
 
 .mapboxgl-ctrl-attrib {
   display: none !important;
+}
+
+/* iOS — prevent input zoom (font-size must be >= 16px) */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* iOS — safe area bottom padding utility */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }

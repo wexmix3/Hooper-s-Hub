@@ -12,6 +12,7 @@ import type { Court, CrowdReport } from '@/types'
 import { BOROUGH_LABELS, formatPrice, timeAgo, isCrowdFresh } from "@/lib/utils"
 import { AMENITY_LABELS } from "@/types"
 import type { Metadata } from 'next'
+import { SaveCourtButton } from '@/components/courts/SaveCourtButton'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -52,7 +53,7 @@ export default async function CourtDetailPage({ params }: PageProps) {
 
   return (
     <div className="bg-[#F8FAFC]">
-      {/* Back button overlaid on photo */}
+      {/* Back button + save button overlaid on photo */}
       <div className="relative">
         <Link
           href="/browse"
@@ -60,6 +61,9 @@ export default async function CourtDetailPage({ params }: PageProps) {
         >
           <ArrowLeft size={18} />
         </Link>
+        <div className="absolute top-4 right-4 z-10">
+          <SaveCourtButton courtId={c.id} className="bg-black/40 backdrop-blur-sm border-0 text-white hover:text-red-400" />
+        </div>
         <PhotoCarousel photos={c.photos ?? []} name={c.name} />
       </div>
 

@@ -80,6 +80,11 @@ export default function LoginPage() {
         <Button type="submit" className="w-full" loading={loading}>
           Sign in
         </Button>
+        <div className="text-right">
+          <Link href="/forgot-password" className="text-sm text-slate-500 hover:text-slate-700 hover:underline">
+            Forgot password?
+          </Link>
+        </div>
       </form>
 
       <div className="flex items-center gap-3 my-5">

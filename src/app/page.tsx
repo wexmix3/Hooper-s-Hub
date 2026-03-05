@@ -1,61 +1,70 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
-import { Map, Users, Zap, Star } from 'lucide-react'
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: "Hooper's Hub NYC — Every Basketball Court in NYC. One App.",
-  description:
-    'Discover every basketball court in New York City — public parks and private gyms. See real-time crowd levels, book private courts instantly, and join pickup games near you.',
-}
-
-const FEATURES = [
-  {
-    icon: <Map size={28} className="text-[#FF6B2C]" />,
-    title: 'Every Court on One Map',
-    description:
-      'We unified hundreds of public NYC Parks courts with private bookable gyms. No more bouncing between apps.',
-  },
-  {
-    icon: <Users size={28} className="text-[#FF6B2C]" />,
-    title: 'Real-Time Crowd Levels',
-    description:
-      'Community-powered crowd reports for public courts. Know before you go if the courts are empty or packed.',
-  },
-  {
-    icon: <Zap size={28} className="text-[#FF6B2C]" />,
-    title: 'Instant Court Booking',
-    description:
-      'Book private courts in seconds. No phone calls, no back-and-forth. Secure payment, instant confirmation.',
-  },
-  {
-    icon: <Star size={28} className="text-[#FF6B2C]" />,
-    title: 'Organize Pickup Games',
-    description:
-      'Create or join pickup runs at any court. Chat with players, track spots, and never play 4-on-4 again.',
-  },
-]
+import { MapPin, Target, CalendarCheck, Map, Users, Zap, Star, ChevronDown, ChevronUp, Instagram, Twitter, Building2, CreditCard, RefreshCw } from 'lucide-react'
+import { Logo } from '@/components/brand/Logo'
 
 const BOROUGHS = [
-  { slug: 'manhattan', name: 'Manhattan' },
-  { slug: 'brooklyn', name: 'Brooklyn' },
-  { slug: 'queens', name: 'Queens' },
-  { slug: 'bronx', name: 'The Bronx' },
-  { slug: 'staten-island', name: 'Staten Island' },
+  { slug: 'manhattan', name: 'Manhattan', emoji: '🗽' },
+  { slug: 'brooklyn', name: 'Brooklyn', emoji: '🌉' },
+  { slug: 'queens', name: 'Queens', emoji: '✈️' },
+  { slug: 'bronx', name: 'The Bronx', emoji: '🎤' },
+  { slug: 'staten-island', name: 'Staten Island', emoji: '⛴️' },
 ]
+
+const FAQS = [
+  {
+    q: 'Is Hooper\'s Hub free?',
+    a: "Yes. Browsing courts, checking crowd levels, and joining pickup runs is 100% free. You only pay if you book a private court.",
+  },
+  {
+    q: 'How do I list my gym or court?',
+    a: "Click 'List your venue' and create an account. You set your own prices and availability. We handle payments and take a small 8% platform fee only when you earn.",
+  },
+  {
+    q: 'Are the crowd reports accurate?',
+    a: "They're community-powered — real players report what they see. Reports older than 2 hours are automatically hidden so you always see fresh data.",
+  },
+  {
+    q: 'What boroughs do you cover?',
+    a: "All five. Manhattan, Brooklyn, Queens, The Bronx, and Staten Island. We have every public park court from NYC Open Data plus a growing list of private gyms.",
+  },
+  {
+    q: 'Can I organize a pickup game?',
+    a: "Yes! Create a 'Run' at any court — public or private. Set the time, skill level, and number of spots. Other players can join and you can coordinate in the built-in chat.",
+  },
+]
+
+function FAQItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="border border-slate-200 rounded-xl overflow-hidden">
+      <button
+        className="w-full flex items-center justify-between px-5 py-4 text-left bg-white hover:bg-slate-50 transition-colors"
+        onClick={() => setOpen(!open)}
+      >
+        <span className="font-semibold text-slate-900 text-sm sm:text-base">{q}</span>
+        {open ? <ChevronUp size={18} className="text-slate-400 flex-shrink-0" /> : <ChevronDown size={18} className="text-slate-400 flex-shrink-0" />}
+      </button>
+      {open && (
+        <div className="px-5 pb-5 bg-white text-slate-600 text-sm leading-relaxed border-t border-slate-100">
+          <p className="pt-3">{a}</p>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      {/* Nav */}
-      <nav className="bg-white border-b border-slate-100 px-5 py-4 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#FF6B2C] rounded-xl flex items-center justify-center">
-            <span className="text-white text-base">🏀</span>
-          </div>
-          <span className="text-[#1B3A5C] text-lg font-bold">Hooper&apos;s Hub</span>
-        </div>
+    <div className="min-h-screen bg-white font-body">
+
+      {/* ── Nav ─────────────────────────────────────────────────────────── */}
+      <nav className="bg-white/90 backdrop-blur-sm border-b border-slate-100 px-5 py-3.5 flex items-center justify-between sticky top-0 z-50">
+        <Logo size={28} />
         <div className="flex items-center gap-3">
-          <Link href="/login" className="text-slate-600 text-sm font-medium hover:text-slate-900">
+          <Link href="/login" className="text-slate-600 text-sm font-medium hover:text-slate-900 hidden sm:block">
             Sign in
           </Link>
           <Link
@@ -67,104 +76,289 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-[#1B3A5C] to-[#0F2942] text-white px-5 py-20 text-center">
-        <div className="max-w-2xl mx-auto">
+      {/* ── Hero ────────────────────────────────────────────────────────── */}
+      <section className="bg-[#0F172A] text-white px-5 py-20 text-center relative overflow-hidden">
+        {/* Radial gradient */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 30%, #1B3A5C 0%, transparent 70%)' }}
+        />
+        <div className="relative z-10 max-w-2xl mx-auto">
+          <div className="flex justify-center mb-8">
+            <Logo size={48} dark />
+          </div>
           <div className="inline-flex items-center gap-2 bg-[#FF6B2C]/20 text-[#FF6B2C] rounded-full px-4 py-2 text-sm font-semibold mb-6 border border-[#FF6B2C]/30">
             🏀 Now live in all 5 boroughs
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight mb-5">
+          <h1 className="font-display text-4xl sm:text-5xl font-extrabold leading-tight mb-5 text-white">
             Every Court in NYC.
             <br />
             <span className="text-[#FF6B2C]">One App.</span>
           </h1>
-          <p className="text-blue-200 text-lg mb-8 leading-relaxed">
-            Find public and private basketball courts, see who&apos;s playing right now,
-            book a gym in seconds, and connect with NYC ballers.
+          <p className="text-blue-200 text-lg mb-8 leading-relaxed max-w-xl mx-auto">
+            Find public parks, book private gyms, check crowd levels, and organize runs with NYC ballers.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/signup"
               className="bg-[#FF6B2C] text-white font-bold px-8 py-4 rounded-xl text-lg hover:bg-[#E55A1F] transition-colors"
             >
-              Start for free
+              Find courts near you →
             </Link>
             <Link
               href="/map"
               className="bg-white/10 text-white font-bold px-8 py-4 rounded-xl text-lg hover:bg-white/20 transition-colors border border-white/20"
             >
-              Explore the map →
+              See the map
             </Link>
+          </div>
+
+          {/* Map mockup */}
+          <div className="mt-12 mx-auto max-w-2xl rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+            <div
+              className="w-full h-64 relative"
+              style={{ background: 'linear-gradient(135deg, #0d1b2a 0%, #1a2e44 50%, #0d1b2a 100%)' }}
+            >
+              {/* Simulated map grid */}
+              <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+              </svg>
+              {/* Simulated court dots */}
+              {[
+                { x: '25%', y: '40%', color: '#22c55e' },
+                { x: '42%', y: '55%', color: '#FF6B2C' },
+                { x: '58%', y: '35%', color: '#22c55e' },
+                { x: '70%', y: '60%', color: '#22c55e' },
+                { x: '35%', y: '65%', color: '#FF6B2C' },
+                { x: '80%', y: '45%', color: '#22c55e' },
+                { x: '15%', y: '55%', color: '#22c55e' },
+                { x: '50%', y: '75%', color: '#22c55e' },
+                { x: '63%', y: '25%', color: '#FF6B2C' },
+              ].map((dot, i) => (
+                <div
+                  key={i}
+                  className="absolute w-3 h-3 rounded-full shadow-lg"
+                  style={{ left: dot.x, top: dot.y, background: dot.color, transform: 'translate(-50%,-50%)', boxShadow: `0 0 8px ${dot.color}` }}
+                />
+              ))}
+              <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-3 py-1.5 rounded-lg backdrop-blur-sm">
+                🏀 342 courts across NYC
+              </div>
+              {/* TODO: Replace with real screenshot */}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="px-5 py-16 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-extrabold text-slate-900 text-center mb-4">
-          Built for NYC ballers
-        </h2>
-        <p className="text-slate-500 text-center mb-12">
-          Everything you need to find your game — on one platform.
-        </p>
-        <div className="grid sm:grid-cols-2 gap-6">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-              <div className="mb-4">{f.icon}</div>
-              <h3 className="font-bold text-slate-900 text-lg mb-2">{f.title}</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">{f.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Browse by Borough */}
-      <section className="bg-white border-y border-slate-100 px-5 py-16">
+      {/* ── How It Works ────────────────────────────────────────────────── */}
+      <section className="px-5 py-20 bg-[#F8FAFC]">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-extrabold text-slate-900 text-center mb-10">
-            Explore by Borough
+          <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 text-center mb-3">
+            How it works
           </h2>
-          <div className="flex flex-wrap justify-center gap-3">
-            {BOROUGHS.map((b) => (
-              <Link
-                key={b.slug}
-                href={`/${b.slug}`}
-                className="px-6 py-3 bg-[#1B3A5C] text-white font-semibold rounded-xl hover:bg-[#0F2942] transition-colors"
-              >
-                {b.name}
-              </Link>
+          <p className="text-slate-500 text-center mb-14 text-base sm:text-lg">
+            From couch to court in under a minute.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-8 relative">
+            {[
+              {
+                num: '01',
+                icon: <MapPin size={28} className="text-[#FF6B2C]" />,
+                title: 'Open the map',
+                desc: 'See every court in the 5 boroughs — public parks and private gyms, all in one view.',
+              },
+              {
+                num: '02',
+                icon: <Target size={28} className="text-[#FF6B2C]" />,
+                title: 'Pick your spot',
+                desc: 'Check real-time crowd levels, read reviews, see surface type, lights, and amenities.',
+              },
+              {
+                num: '03',
+                icon: <CalendarCheck size={28} className="text-[#FF6B2C]" />,
+                title: 'Book or just show up',
+                desc: 'Reserve a private court in seconds, or join a pickup run at any public park.',
+              },
+            ].map((step) => (
+              <div key={step.num} className="relative bg-white rounded-2xl p-7 border border-slate-100 shadow-sm">
+                <span className="absolute top-4 right-5 text-6xl font-extrabold text-slate-100 select-none leading-none font-display">
+                  {step.num}
+                </span>
+                <div className="mb-4 relative z-10">{step.icon}</div>
+                <h3 className="font-display font-bold text-slate-900 text-lg mb-2 relative z-10">{step.title}</h3>
+                <p className="text-slate-500 text-sm leading-relaxed relative z-10">{step.desc}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="px-5 py-20 text-center bg-[#FF6B2C]">
+      {/* ── Features Grid ───────────────────────────────────────────────── */}
+      <section className="px-5 py-16 max-w-4xl mx-auto">
+        <h2 className="font-display text-3xl font-extrabold text-slate-900 text-center mb-3">
+          Built for NYC ballers
+        </h2>
+        <p className="text-slate-500 text-center mb-12">Everything you need to find your game.</p>
+        <div className="grid sm:grid-cols-2 gap-5">
+          {[
+            { icon: <Map size={26} className="text-[#FF6B2C]" />, title: 'Unified Court Map', desc: 'Every public NYC Parks court + private bookable gyms. No more bouncing between apps.' },
+            { icon: <Users size={26} className="text-[#FF6B2C]" />, title: 'Live Crowd Reports', desc: 'Community-powered crowd levels for public courts. Know before you go.' },
+            { icon: <Zap size={26} className="text-[#FF6B2C]" />, title: 'Instant Booking', desc: 'Book private courts in seconds. Secure payment, instant confirmation.' },
+            { icon: <Star size={26} className="text-[#FF6B2C]" />, title: 'Pickup Runs', desc: 'Create or join runs at any court. Chat, track spots, and never play 4-on-4 again.' },
+          ].map((f) => (
+            <div
+              key={f.title}
+              className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:border-[#FF6B2C]/40 hover:shadow-md transition-all duration-200 group"
+            >
+              <div className="mb-4 p-2.5 bg-orange-50 rounded-xl w-fit group-hover:bg-orange-100 transition-colors">{f.icon}</div>
+              <h3 className="font-display font-bold text-slate-900 text-lg mb-2">{f.title}</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── For Venue Owners ────────────────────────────────────────────── */}
+      <section className="bg-[#F8FAFC] border-y border-slate-100 px-5 py-20">
+        <div className="max-w-4xl mx-auto grid sm:grid-cols-2 gap-12 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 rounded-full px-3 py-1.5 text-xs font-semibold mb-5">
+              <Building2 size={14} /> For Venue Owners
+            </div>
+            <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4">
+              Own a gym or court?
+            </h2>
+            <p className="text-slate-600 text-lg mb-8 leading-relaxed">
+              List your space on Hooper&apos;s Hub and fill your empty court hours. No upfront cost — you only pay when you earn.
+            </p>
+            <Link
+              href="/venue-signup"
+              className="inline-block bg-[#1B3A5C] text-white font-bold px-8 py-4 rounded-xl hover:bg-[#0F2942] transition-colors text-base"
+            >
+              List your venue →
+            </Link>
+          </div>
+          <div className="space-y-5">
+            {[
+              { icon: <RefreshCw size={20} className="text-[#FF6B2C]" />, title: 'Real-time calendar sync', desc: 'Your availability updates instantly. No manual work.' },
+              { icon: <CreditCard size={20} className="text-[#FF6B2C]" />, title: 'Automatic payments via Stripe', desc: 'Get paid directly. We handle all the billing.' },
+              { icon: <Users size={20} className="text-[#FF6B2C]" />, title: 'Reach thousands of local players', desc: 'Tap into NYC\'s basketball community — no ads needed.' },
+            ].map((item) => (
+              <div key={item.title} className="flex items-start gap-4 bg-white p-4 rounded-xl border border-slate-100">
+                <div className="p-2 bg-orange-50 rounded-lg flex-shrink-0">{item.icon}</div>
+                <div>
+                  <h4 className="font-semibold text-slate-900 text-sm">{item.title}</h4>
+                  <p className="text-slate-500 text-xs mt-0.5">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Borough Explorer ────────────────────────────────────────────── */}
+      <section className="px-5 py-16 max-w-4xl mx-auto">
+        <h2 className="font-display text-3xl font-extrabold text-slate-900 text-center mb-3">
+          Explore by Borough
+        </h2>
+        <p className="text-slate-500 text-center mb-10">Every court. Every neighborhood.</p>
+        <div className="flex flex-wrap justify-center gap-3">
+          {BOROUGHS.map((b) => (
+            <Link
+              key={b.slug}
+              href={`/${b.slug}`}
+              className="flex items-center gap-2 px-6 py-3.5 bg-white border border-slate-200 text-slate-900 font-semibold rounded-xl hover:bg-[#1B3A5C] hover:text-white hover:border-[#1B3A5C] transition-all duration-200 shadow-sm"
+            >
+              <span>{b.emoji}</span>
+              <span>{b.name}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Social Proof ────────────────────────────────────────────────── */}
+      <section className="bg-[#FF6B2C] px-5 py-20 text-center">
         <div className="max-w-lg mx-auto">
-          <h2 className="text-3xl font-extrabold text-white mb-4">Ready to hoop?</h2>
-          <p className="text-orange-100 mb-8">
-            Join thousands of NYC players who use Hooper&apos;s Hub to find their next game.
+          <h2 className="font-display text-3xl font-extrabold text-white mb-3">Ready to hoop?</h2>
+          <p className="text-orange-100 mb-3 text-lg">
+            Be one of the first hoopers in your borough.
+          </p>
+          <p className="text-orange-200 text-sm mb-8">
+            Courts mapped across all 5 boroughs of New York City.
           </p>
           <Link
             href="/signup"
             className="inline-block bg-white text-[#FF6B2C] font-bold px-10 py-4 rounded-xl text-lg hover:bg-orange-50 transition-colors shadow-lg"
           >
-            Sign up free →
+            Join the community →
           </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-[#0F2942] text-blue-300 px-5 py-10">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-white font-bold">Hooper&apos;s Hub NYC</span>
-            <span className="text-blue-400 text-sm">— Every court, one app.</span>
+      {/* ── FAQ ─────────────────────────────────────────────────────────── */}
+      <section className="px-5 py-16 max-w-2xl mx-auto">
+        <h2 className="font-display text-3xl font-extrabold text-slate-900 text-center mb-10">
+          Frequently asked questions
+        </h2>
+        <div className="space-y-3">
+          {FAQS.map((faq) => <FAQItem key={faq.q} {...faq} />)}
+        </div>
+      </section>
+
+      {/* ── Footer ──────────────────────────────────────────────────────── */}
+      <footer className="bg-[#0F172A] text-slate-400 px-5 py-14">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col sm:flex-row gap-10 mb-10">
+            {/* Brand */}
+            <div className="sm:w-1/3">
+              <Logo size={28} dark />
+              <p className="text-slate-500 text-sm mt-3 leading-relaxed">
+                Every basketball court in NYC. One app.
+              </p>
+              <div className="flex gap-3 mt-4">
+                <a href="#" className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                  <Instagram size={16} />
+                </a>
+                <a href="#" className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                  <Twitter size={16} />
+                </a>
+              </div>
+            </div>
+            {/* Links */}
+            <div className="flex-1 grid grid-cols-3 gap-6 text-sm">
+              <div>
+                <h4 className="text-white font-semibold mb-3">Product</h4>
+                <ul className="space-y-2">
+                  <li><Link href="/map" className="hover:text-white transition-colors">Map</Link></li>
+                  <li><Link href="/browse" className="hover:text-white transition-colors">Browse</Link></li>
+                  <li><Link href="/runs" className="hover:text-white transition-colors">Runs</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-3">Company</h4>
+                <ul className="space-y-2">
+                  <li><Link href="/venue-signup" className="hover:text-white transition-colors">List Your Venue</Link></li>
+                  <li><Link href="/support" className="hover:text-white transition-colors">Contact</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-3">Legal</h4>
+                <ul className="space-y-2">
+                  <li><Link href="/terms" className="hover:text-white transition-colors">Terms</Link></li>
+                  <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link></li>
+                  <li><Link href="/support" className="hover:text-white transition-colors">Support</Link></li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <div className="flex gap-6 text-sm">
-            <Link href="/map" className="hover:text-white transition-colors">Map</Link>
-            <Link href="/browse" className="hover:text-white transition-colors">Browse</Link>
-            <Link href="/runs" className="hover:text-white transition-colors">Runs</Link>
+          <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-slate-500">
+            <span>© 2026 Hooper&apos;s Hub NYC</span>
+            <span>Made for NYC ballers 🏀</span>
           </div>
         </div>
       </footer>

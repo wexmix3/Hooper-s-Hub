@@ -47,6 +47,27 @@ export async function POST(request: NextRequest) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const platformFee = calculateFee(slot.price)
+    const total = slot.price + platformFee
+
+    // Get court owner's Stripe account if available
+    let ownerStripeAccountId: string | null = null
+    if (court.owner_id) {
+      const { data: ownerProfile } = await supabase
+        .from('profiles')
+        .select('stripe_account_id, stripe_connected')
+        .eq('user_id', court.owner_id)
+        .single()
+      if (ownerProfile?.stripe_connected && ownerProfile.stripe_account_id) {
+        ownerStripeAccountId = ownerProfile.stripe_account_id
+      }
+    }
+
+    // Build payment_intent_data with Connect if owner is set up
+    const paymentIntentData: Record<string, unknown> = {}
+    if (ownerStripeAccountId) {
+      paymentIntentData.application_fee_amount = platformFee
+      paymentIntentData.transfer_data = { destination: ownerStripeAccountId }
+    }
 
     // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
@@ -61,17 +82,19 @@ export async function POST(request: NextRequest) {
               description: `${slot.date} ${slot.start_time}–${slot.end_time}`,
               images: court.photos?.[0] ? [court.photos[0]] : [],
             },
-            unit_amount: slot.price + platformFee,
+            unit_amount: total,
           },
           quantity: 1,
         },
       ],
+      ...(Object.keys(paymentIntentData).length > 0 && { payment_intent_data: paymentIntentData }),
       metadata: {
         slot_id: slotId,
         court_id: courtId,
         user_id: user.id,
+        platform_fee: platformFee.toString(),
       },
-      success_url: `${appUrl}/profile/bookings?booking=success`,
+      success_url: `${appUrl}/booking-confirmed/{CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/courts/${courtId}`,
       expires_at: Math.floor(Date.now() / 1000) + 10 * 60, // 10 min
     })

@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LogOut, Calendar, ChevronRight, Edit2 } from 'lucide-react'
+import { LogOut, Calendar, ChevronRight, Edit2, Heart, MapPin, BarChart3 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
-import type { Profile } from '@/types'
+import type { Profile, Court } from '@/types'
 
 const SKILL_OPTIONS = [
   { value: 'any', label: 'All Levels' },
@@ -26,6 +26,8 @@ export default function ProfilePage() {
   const [skillLevel, setSkillLevel] = useState('any')
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [savedCourts, setSavedCourts] = useState<Court[]>([])
+  const [isVenueOwner, setIsVenueOwner] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -40,9 +42,21 @@ export default function ProfilePage() {
         .single()
 
       if (data) {
+        setIsVenueOwner(data.is_venue_owner ?? false)
         setProfile(data as Profile)
         setDisplayName(data.display_name)
         setSkillLevel(data.skill_level ?? 'any')
+      }
+
+      // Load saved courts
+      const { data: saved } = await supabase
+        .from('saved_courts')
+        .select('court:courts(*)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20)
+      if (saved) {
+        setSavedCourts(saved.map((s: { court: Court | Court[] }) => (Array.isArray(s.court) ? s.court[0] : s.court)).filter(Boolean))
       }
       setLoading(false)
     }
@@ -143,6 +157,17 @@ export default function ProfilePage() {
           <ChevronRight size={18} className="text-slate-400" />
         </Link>
 
+        {isVenueOwner && (
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 bg-white rounded-xl p-4 border border-slate-100 active:scale-[0.99] transition-transform"
+          >
+            <BarChart3 size={20} className="text-[#1B3A5C]" />
+            <span className="flex-1 font-medium text-slate-900">Venue Dashboard</span>
+            <ChevronRight size={18} className="text-slate-400" />
+          </Link>
+        )}
+
         <button
           onClick={handleSignOut}
           className="flex items-center gap-3 bg-white rounded-xl p-4 border border-slate-100 w-full text-left active:scale-[0.99] transition-transform"
@@ -151,6 +176,33 @@ export default function ProfilePage() {
           <span className="flex-1 font-medium text-red-500">Sign Out</span>
         </button>
       </div>
+
+      {/* Saved Courts */}
+      {savedCourts.length > 0 && (
+        <div className="px-4 pb-6">
+          <h2 className="font-bold text-slate-900 mb-3 flex items-center gap-2">
+            <Heart size={16} className="text-red-400 fill-red-400" />
+            Saved Courts
+          </h2>
+          <div className="space-y-2">
+            {savedCourts.map((court) => (
+              <Link
+                key={court.id}
+                href={`/courts/${court.id}`}
+                className="flex items-center gap-3 bg-white rounded-xl p-4 border border-slate-100 active:scale-[0.99] transition-transform"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-slate-900 truncate">{court.name}</p>
+                  <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                    <MapPin size={10} /> {court.address}
+                  </p>
+                </div>
+                <ChevronRight size={18} className="text-slate-400 flex-shrink-0" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
