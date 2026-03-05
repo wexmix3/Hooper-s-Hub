@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <div className="w-10 h-10 bg-[#FF6B2C] rounded-2xl flex items-center justify-center">
               <span className="text-white text-xl">🏀</span>
             </div>
-            <span className="text-white text-2xl font-bold tracking-tight">CourtBook</span>
+            <span className="text-white text-2xl font-bold tracking-tight">Hooper&apos;s Hub</span>
           </div>
           <p className="text-blue-200 text-sm mt-2">Every court in NYC. One app.</p>
         </div>

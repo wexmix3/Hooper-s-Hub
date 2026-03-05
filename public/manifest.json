@@ -1,6 +1,6 @@
 {
-  "name": "CourtBook NYC",
-  "short_name": "CourtBook",
+  "name": "Hooper's Hub NYC",
+  "short_name": "Hooper's Hub",
   "description": "Find and book basketball courts in New York City",
   "start_url": "/map",
   "display": "standalone",

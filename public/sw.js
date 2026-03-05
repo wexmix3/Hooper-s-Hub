@@ -1,4 +1,4 @@
-const CACHE_NAME = 'courtbook-v1'
+const CACHE_NAME = 'hoopers-hub-v1'
 const APP_SHELL = [
   '/',
   '/map',

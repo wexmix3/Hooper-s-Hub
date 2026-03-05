@@ -3,23 +3,23 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'CourtBook NYC — Find & Book Basketball Courts',
-    template: '%s | CourtBook NYC',
+    default: "Hooper's Hub NYC — Find & Book Basketball Courts",
+    template: "%s | Hooper's Hub NYC",
   },
   description:
     'Discover every basketball court in New York City — public parks and private gyms. See real-time crowd levels, book private courts instantly, and join pickup games.',
   keywords: ['basketball courts NYC', 'book basketball court', 'pickup games NYC', 'NYC basketball'],
   openGraph: {
-    title: 'CourtBook NYC — Every Court in NYC. One App.',
+    title: "Hooper's Hub NYC — Every Court in NYC. One App.",
     description: 'Find, book, and play basketball at any court in New York City.',
-    siteName: 'CourtBook NYC',
+    siteName: "Hooper's Hub NYC",
     type: 'website',
   },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'CourtBook',
+    title: "Hooper's Hub",
   },
 }
 

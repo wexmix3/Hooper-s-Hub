@@ -3,7 +3,7 @@ import { Map, Users, Zap, Star } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'CourtBook NYC — Every Basketball Court in NYC. One App.',
+  title: "Hooper's Hub NYC — Every Basketball Court in NYC. One App.",
   description:
     'Discover every basketball court in New York City — public parks and private gyms. See real-time crowd levels, book private courts instantly, and join pickup games near you.',
 }
@@ -52,7 +52,7 @@ export default function LandingPage() {
           <div className="w-8 h-8 bg-[#FF6B2C] rounded-xl flex items-center justify-center">
             <span className="text-white text-base">🏀</span>
           </div>
-          <span className="text-[#1B3A5C] text-lg font-bold">CourtBook</span>
+          <span className="text-[#1B3A5C] text-lg font-bold">Hooper&apos;s Hub</span>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/login" className="text-slate-600 text-sm font-medium hover:text-slate-900">
@@ -143,7 +143,7 @@ export default function LandingPage() {
         <div className="max-w-lg mx-auto">
           <h2 className="text-3xl font-extrabold text-white mb-4">Ready to hoop?</h2>
           <p className="text-orange-100 mb-8">
-            Join thousands of NYC players who use CourtBook to find their next game.
+            Join thousands of NYC players who use Hooper&apos;s Hub to find their next game.
           </p>
           <Link
             href="/signup"
@@ -158,7 +158,7 @@ export default function LandingPage() {
       <footer className="bg-[#0F2942] text-blue-300 px-5 py-10">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-white font-bold">CourtBook NYC</span>
+            <span className="text-white font-bold">Hooper&apos;s Hub NYC</span>
             <span className="text-blue-400 text-sm">— Every court, one app.</span>
           </div>
           <div className="flex gap-6 text-sm">

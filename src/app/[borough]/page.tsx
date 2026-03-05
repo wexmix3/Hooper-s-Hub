@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `Basketball Courts in ${displayName}, NYC`,
     description: `Find every basketball court in ${displayName}, New York City. Public parks, indoor gyms, and bookable courts with real-time crowd levels.`,
     openGraph: {
-      title: `Basketball Courts in ${displayName} NYC — CourtBook`,
+      title: `Basketball Courts in ${displayName} NYC — Hooper's Hub`,
       description: `Discover and book basketball courts in ${displayName}. Real-time crowd levels, pickup games, and instant booking.`,
     },
   }
@@ -89,7 +89,7 @@ export default async function BoroughPage({ params }: PageProps) {
   const faqs = [
     {
       q: `How many basketball courts are in ${displayName}?`,
-      a: `There are ${courtList.length} basketball courts in ${displayName} on CourtBook — including ${publicCourts.length} free public courts and ${privateCourts.length} private bookable gyms.`,
+      a: `There are ${courtList.length} basketball courts in ${displayName} on Hooper's Hub — including ${publicCourts.length} free public courts and ${privateCourts.length} private bookable gyms.`,
     },
     {
       q: `Are there indoor basketball courts in ${displayName}?`,
@@ -97,11 +97,11 @@ export default async function BoroughPage({ params }: PageProps) {
     },
     {
       q: `Can I book a basketball court in ${displayName} online?`,
-      a: `Absolutely. ${privateCourts.length} courts in ${displayName} support instant online booking through CourtBook. View available times and pay securely with your card.`,
+      a: `Absolutely. ${privateCourts.length} courts in ${displayName} support instant online booking through Hooper's Hub. View available times and pay securely with your card.`,
     },
     {
       q: `How do I find a pickup game in ${displayName}?`,
-      a: `Use the Runs feature on CourtBook to find pickup games near you in ${displayName}. You can also create your own run and invite other players.`,
+      a: `Use the Runs feature on Hooper's Hub to find pickup games near you in ${displayName}. You can also create your own run and invite other players.`,
     },
   ]
 
@@ -117,7 +117,7 @@ export default async function BoroughPage({ params }: PageProps) {
         <div className="bg-[#1B3A5C] text-white px-5 pt-8 pb-10">
           <Link href="/" className="flex items-center gap-2 text-blue-200 text-sm mb-6 hover:text-white transition-colors">
             <ArrowLeft size={16} />
-            CourtBook NYC
+            Hooper&apos;s Hub NYC
           </Link>
           <h1 className="text-3xl font-extrabold mb-2">
             Basketball Courts in {displayName}
