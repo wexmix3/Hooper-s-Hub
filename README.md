@@ -102,3 +102,4 @@ Paste `supabase/migrations/004_seed_courts.sql` into the Supabase SQL Editor and
 - **Maps**: Mapbox GL JS via react-map-gl
 - **Payments**: Stripe
 - **Deployment**: Vercel
+# Hooper-s-Hub
