@@ -49,11 +49,28 @@ export const INDOOR_PHOTOS: string[] = [
   `${BASE}1541534741688-6078c5cbcf30${PARAMS}`,
 ]
 
+// Iconic court overrides — keyed by lowercase substrings of court name
+const ICONIC_OVERRIDES: Record<string, string> = {
+  'rucker':   `${BASE}1546519638405-a9c0d51ca0b7${PARAMS}`, // aerial urban court
+  'west 4th': `${BASE}1574629810360-7efbbe195018${PARAMS}`, // fenced court vibe
+  'the cage': `${BASE}1574629810360-7efbbe195018${PARAMS}`,
+  'dyckman':  `${BASE}1612872087720-bb876e2e67d1${PARAMS}`, // court at golden hour
+  'tompkins': `${BASE}1585974738773-5be5c5bef7c6${PARAMS}`, // park court with energy
+}
+
 /**
  * Returns a deterministic Unsplash photo URL for a court.
- * The same court ID always returns the same photo.
+ * Iconic courts get a distinctive photo; others are assigned by ID hash.
  */
-export function getCourtPhoto(id: string, type: 'indoor' | 'outdoor'): string {
+export function getCourtPhoto(id: string, type: 'indoor' | 'outdoor', name?: string): string {
+  // Check iconic court overrides first (match by court name)
+  if (name) {
+    const lower = name.toLowerCase()
+    for (const [key, url] of Object.entries(ICONIC_OVERRIDES)) {
+      if (lower.includes(key)) return url
+    }
+  }
+
   const photos = type === 'indoor' ? INDOOR_PHOTOS : OUTDOOR_PHOTOS
   // Simple hash: sum char codes mod array length
   let hash = 0
@@ -68,5 +85,5 @@ export function getCourtPhoto(id: string, type: 'indoor' | 'outdoor'): string {
  * (used before we have a UUID).
  */
 export function getPhotoByName(name: string, type: 'indoor' | 'outdoor'): string {
-  return getCourtPhoto(name, type)
+  return getCourtPhoto(name, type, name)
 }

@@ -1,10 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { MapPin, Star, Zap } from "lucide-react"
 import { Badge } from '@/components/ui/Badge'
 import { CrowdBadge } from './CrowdBadge'
+import { CourtImage } from './CourtImage'
 import type { Court } from '@/types'
 import { formatDistance, formatPrice, BOROUGH_LABELS } from '@/lib/utils'
 
@@ -13,30 +13,19 @@ interface CourtCardProps {
 }
 
 export function CourtCard({ court }: CourtCardProps) {
-  const photo = court.photos?.[0]
-
   return (
     <Link href={`/courts/${court.id}`} className="block group">
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden transition-shadow duration-200 group-hover:shadow-md active:scale-[0.99]">
         {/* Photo */}
         <div className="relative h-44 bg-slate-200 overflow-hidden">
-          {photo ? (
-            <Image
-              src={photo}
-              alt={court.name}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              unoptimized
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full text-slate-400 bg-slate-100">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" className="opacity-30">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M12 2C16 6 16 10 12 12C8 14 8 18 12 22" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                <line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" strokeWidth="1.5"/>
-              </svg>
-            </div>
-          )}
+          <CourtImage
+            photos={court.photos ?? []}
+            courtId={court.id}
+            courtName={court.name}
+            isIndoor={court.indoor}
+            alt={court.name}
+            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+          />
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {court.booking_status === 'coming_soon' ? (

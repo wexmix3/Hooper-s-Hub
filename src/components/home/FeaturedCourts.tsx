@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { MapPin } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { CourtImage } from '@/components/courts/CourtImage'
 
 interface CourtPreview {
   id: string
@@ -14,6 +14,7 @@ interface CourtPreview {
   photos: string[] | null
   avg_rating: number
   type: string
+  indoor: boolean
 }
 
 const BOROUGH_SHORT: Record<string, string> = {
@@ -31,7 +32,7 @@ export function FeaturedCourts() {
     const supabase = createClient()
     supabase
       .from('courts')
-      .select('id, name, neighborhood, borough, photos, avg_rating, type')
+      .select('id, name, neighborhood, borough, photos, avg_rating, type, indoor')
       .eq('type', 'public')
       .order('avg_rating', { ascending: false })
       .limit(8)
@@ -58,23 +59,14 @@ export function FeaturedCourts() {
               className="flex-shrink-0 w-48 group"
             >
               <div className="relative h-32 rounded-xl overflow-hidden bg-slate-200 mb-2">
-                {court.photos?.[0] ? (
-                  <Image
-                    src={court.photos[0]}
-                    alt={court.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    unoptimized
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-slate-800">
-                    <svg viewBox="0 0 24 24" className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 2a10 10 0 0 1 0 20M12 2a10 10 0 0 0 0 20M2 12h20" />
-                      <path d="M12 2C8 6 8 18 12 22M12 2c4 4 4 16 0 20" />
-                    </svg>
-                  </div>
-                )}
+                <CourtImage
+                  photos={court.photos ?? []}
+                  courtId={court.id}
+                  courtName={court.name}
+                  isIndoor={court.indoor}
+                  alt={court.name}
+                  className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute bottom-2 left-2 flex items-center gap-1 text-white text-xs font-semibold">
                   <MapPin size={10} />

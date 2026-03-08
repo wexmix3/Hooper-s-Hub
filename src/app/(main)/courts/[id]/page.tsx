@@ -76,7 +76,7 @@ export default async function CourtDetailPage({ params }: PageProps) {
         <div className="absolute top-4 right-4 z-10">
           <SaveCourtButton courtId={c.id} className="bg-black/40 backdrop-blur-sm border-0 text-white hover:text-red-400" />
         </div>
-        <PhotoCarousel photos={c.photos ?? []} name={c.name} />
+        <PhotoCarousel photos={c.photos ?? []} name={c.name} courtId={c.id} isIndoor={c.indoor} />
       </div>
 
       <div className="px-4 py-5 space-y-6">

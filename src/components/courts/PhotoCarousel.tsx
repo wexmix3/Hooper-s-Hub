@@ -2,19 +2,30 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { CourtImage } from './CourtImage'
 
 interface PhotoCarouselProps {
   photos: string[]
   name: string
+  courtId: string
+  isIndoor: boolean
 }
 
-export function PhotoCarousel({ photos, name }: PhotoCarouselProps) {
+export function PhotoCarousel({ photos, name, courtId, isIndoor }: PhotoCarouselProps) {
   const [active, setActive] = useState(0)
 
   if (photos.length === 0) {
     return (
-      <div className="h-56 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-        <span className="text-6xl">🏀</span>
+      <div className="relative h-56 overflow-hidden">
+        <CourtImage
+          photos={[]}
+          courtId={courtId}
+          courtName={name}
+          isIndoor={isIndoor}
+          alt={name}
+          className="object-cover w-full h-full"
+          priority
+        />
       </div>
     )
   }
@@ -29,6 +40,7 @@ export function PhotoCarousel({ photos, name }: PhotoCarouselProps) {
           fill
           className="object-cover"
           priority
+          unoptimized
         />
       </div>
 
