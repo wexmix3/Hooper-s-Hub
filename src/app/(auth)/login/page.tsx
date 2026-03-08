@@ -8,6 +8,32 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 
+function LoginSkeleton() {
+  return (
+    <div className="p-6 sm:p-8 animate-pulse">
+      <div className="h-7 bg-slate-200 rounded w-36 mb-2" />
+      <div className="h-4 bg-slate-100 rounded w-52 mb-6" />
+      <div className="space-y-4">
+        <div>
+          <div className="h-4 bg-slate-100 rounded w-12 mb-1.5" />
+          <div className="h-11 bg-slate-100 rounded-xl" />
+        </div>
+        <div>
+          <div className="h-4 bg-slate-100 rounded w-16 mb-1.5" />
+          <div className="h-11 bg-slate-100 rounded-xl" />
+        </div>
+        <div className="h-11 bg-slate-200 rounded-xl" />
+      </div>
+      <div className="my-5 flex items-center gap-3">
+        <div className="flex-1 h-px bg-slate-200" />
+        <div className="h-3 bg-slate-100 rounded w-4" />
+        <div className="flex-1 h-px bg-slate-200" />
+      </div>
+      <div className="h-11 bg-slate-100 rounded-xl border border-slate-200" />
+    </div>
+  )
+}
+
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -31,16 +57,20 @@ function LoginForm() {
     setEmailUnconfirmed(false)
 
     const supabase = createClient()
-    const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    })
 
     if (error) {
       const msg = error.message.toLowerCase()
       if (msg.includes('email not confirmed') || msg.includes('confirm your email')) {
-        // Supabase explicitly says email isn't confirmed — show resend UI
         setEmailUnconfirmed(true)
         setError(null)
       } else if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
-        setError('Email or password is incorrect. Double-check and try again.')
+        setError(
+          'Email or password is incorrect. If you signed up with Google, use "Continue with Google" below.'
+        )
       } else if (msg.includes('too many requests') || msg.includes('rate limit')) {
         setError('Too many attempts. Please wait a few minutes and try again.')
       } else {
@@ -74,7 +104,7 @@ function LoginForm() {
     const supabase = createClient()
     await supabase.auth.resend({
       type: 'signup',
-      email,
+      email: email.trim().toLowerCase(),
       options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     })
     setResendLoading(false)
@@ -86,7 +116,10 @@ function LoginForm() {
     const supabase = createClient()
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+        queryParams: { access_type: 'offline', prompt: 'select_account' },
+      },
     })
   }
 
@@ -97,7 +130,7 @@ function LoginForm() {
 
       {message === 'password_updated' && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">
-          Password updated — sign in with your new password.
+          Password updated — you&apos;re now signed in.
         </div>
       )}
 
@@ -202,7 +235,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading…</div>}>
+    <Suspense fallback={<LoginSkeleton />}>
       <LoginForm />
     </Suspense>
   )

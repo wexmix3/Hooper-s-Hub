@@ -31,10 +31,10 @@ export default function SignupPage() {
 
     const supabase = createClient()
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: email.trim().toLowerCase(),
       password,
       options: {
-        data: { full_name: name },
+        data: { full_name: name.trim(), display_name: name.trim() },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     })
@@ -67,7 +67,10 @@ export default function SignupPage() {
     const supabase = createClient()
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { access_type: 'offline', prompt: 'select_account' },
+      },
     })
   }
 

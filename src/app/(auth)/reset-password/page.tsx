@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lock } from 'lucide-react'
+import { Lock, CheckCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -13,6 +13,7 @@ export default function ResetPasswordPage() {
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -32,8 +33,14 @@ export default function ResetPasswordPage() {
     const { error: err } = await supabase.auth.updateUser({ password })
 
     if (err) {
-      if (err.message.toLowerCase().includes('session')) {
-        router.push('/forgot-password')
+      if (err.message.toLowerCase().includes('session') || err.message.toLowerCase().includes('expired')) {
+        setError('Reset link has expired. Please request a new one.')
+        setLoading(false)
+        return
+      }
+      if (err.message.toLowerCase().includes('same password') || err.message.toLowerCase().includes('different from')) {
+        setError('New password must be different from your current password.')
+        setLoading(false)
         return
       }
       setError(err.message)
@@ -41,7 +48,22 @@ export default function ResetPasswordPage() {
       return
     }
 
-    router.push('/login?message=password_updated')
+    setSuccess(true)
+    // Session is already active — go straight to profile
+    setTimeout(() => {
+      router.push('/profile')
+      router.refresh()
+    }, 2000)
+  }
+
+  if (success) {
+    return (
+      <div className="p-8 text-center">
+        <CheckCircle2 size={48} className="text-green-500 mx-auto mb-4" />
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Password updated!</h2>
+        <p className="text-slate-500 text-sm">Taking you to your profile…</p>
+      </div>
+    )
   }
 
   return (
@@ -52,6 +74,12 @@ export default function ResetPasswordPage() {
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
           {error}
+          {error.includes('expired') && (
+            <span>
+              {' '}
+              <a href="/forgot-password" className="font-semibold underline">Request a new link →</a>
+            </span>
+          )}
         </div>
       )}
 
