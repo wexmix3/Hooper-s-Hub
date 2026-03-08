@@ -11,14 +11,15 @@ import { Input } from '@/components/ui/Input'
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirect') ?? '/map'
+  const redirectTo = searchParams.get('redirect') ?? '/profile'
   const message = searchParams.get('message')
+  const urlError = searchParams.get('error')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(urlError)
   const [emailUnconfirmed, setEmailUnconfirmed] = useState(false)
   const [resendLoading, setResendLoading] = useState(false)
   const [resendSent, setResendSent] = useState(false)
