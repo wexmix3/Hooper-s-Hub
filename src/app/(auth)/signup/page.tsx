@@ -30,7 +30,7 @@ export default function SignupPage() {
     setError(null)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -40,11 +40,24 @@ export default function SignupPage() {
     })
 
     if (error) {
-      setError(error.message)
+      const msg = error.message.toLowerCase()
+      if (msg.includes('already registered') || msg.includes('already been registered') || msg.includes('user already')) {
+        setError('An account with this email already exists. Try signing in instead.')
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
       return
     }
 
+    // Email confirmation disabled — Supabase returns a session immediately
+    if (data.session) {
+      router.push('/onboarding')
+      router.refresh()
+      return
+    }
+
+    // Email confirmation required — show check-your-email screen
     setSuccess(true)
     setLoading(false)
   }

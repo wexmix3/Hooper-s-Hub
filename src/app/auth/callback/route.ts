@@ -17,7 +17,8 @@ export async function GET(request: Request) {
         .eq('user_id', data.user.id)
         .single()
       const needsOnboarding = !profile?.onboarding_completed && !profile?.borough
-      const destination = needsOnboarding ? '/onboarding' : next
+      // Never redirect away from an explicit next param (e.g. /reset-password)
+      const destination = next !== '/map' ? next : needsOnboarding ? '/onboarding' : '/map'
       return NextResponse.redirect(`${origin}${destination}`)
     }
   }

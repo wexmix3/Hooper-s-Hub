@@ -35,10 +35,13 @@ function LoginForm() {
     if (error) {
       const msg = error.message.toLowerCase()
       if (msg.includes('email not confirmed') || msg.includes('confirm your email')) {
+        // Supabase explicitly says email isn't confirmed — show resend UI
         setEmailUnconfirmed(true)
+        setError(null)
       } else if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
-        setError('Incorrect email or password. If you just signed up, check your confirmation email first.')
-        setEmailUnconfirmed(true)
+        setError('Email or password is incorrect. Double-check and try again.')
+      } else if (msg.includes('too many requests') || msg.includes('rate limit')) {
+        setError('Too many attempts. Please wait a few minutes and try again.')
       } else {
         setError(error.message)
       }
@@ -179,6 +182,19 @@ function LoginForm() {
           Sign up free
         </Link>
       </p>
+
+      {!emailUnconfirmed && (
+        <p className="text-center text-xs text-slate-400 mt-3">
+          Signed up but never got a confirmation email?{' '}
+          <button
+            type="button"
+            onClick={() => { if (email) setEmailUnconfirmed(true); else setError('Enter your email above first.') }}
+            className="underline hover:no-underline"
+          >
+            Resend it
+          </button>
+        </p>
+      )}
     </div>
   )
 }

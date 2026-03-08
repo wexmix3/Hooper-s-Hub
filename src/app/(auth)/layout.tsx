@@ -21,6 +21,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {children}
         </div>
+        {/* Escape hatch */}
+        <p className="text-center text-blue-200 text-sm mt-6">
+          <Link href="/map" className="hover:text-white transition-colors">
+            Browse courts without an account →
+          </Link>
+        </p>
       </div>
     </div>
   )
