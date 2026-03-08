@@ -1,37 +1,80 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Mail, Lock, Chrome } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') ?? '/map'
+  const message = searchParams.get('message')
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [emailUnconfirmed, setEmailUnconfirmed] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSent, setResendSent] = useState(false)
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setEmailUnconfirmed(false)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      setError(error.message)
+      const msg = error.message.toLowerCase()
+      if (msg.includes('email not confirmed') || msg.includes('confirm your email')) {
+        setEmailUnconfirmed(true)
+      } else if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
+        setError('Incorrect email or password. If you just signed up, check your confirmation email first.')
+        setEmailUnconfirmed(true)
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
       return
     }
 
-    router.push('/map')
+    // New users go through onboarding first
+    if (authData.user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('borough, onboarding_completed')
+        .eq('user_id', authData.user.id)
+        .single()
+      if (!profile?.onboarding_completed && !profile?.borough) {
+        router.push('/onboarding')
+        router.refresh()
+        return
+      }
+    }
+
+    router.push(redirectTo)
     router.refresh()
+  }
+
+  async function handleResendConfirmation() {
+    if (!email) { setError('Enter your email above first.'); return }
+    setResendLoading(true)
+    const supabase = createClient()
+    await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    })
+    setResendLoading(false)
+    setResendSent(true)
   }
 
   async function handleGoogleLogin() {
@@ -39,7 +82,7 @@ export default function LoginPage() {
     const supabase = createClient()
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}` },
     })
   }
 
@@ -48,9 +91,35 @@ export default function LoginPage() {
       <h1 className="text-2xl font-bold text-slate-900 mb-1">Welcome back</h1>
       <p className="text-slate-500 text-sm mb-6">Sign in to find your next game</p>
 
+      {message === 'password_updated' && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">
+          Password updated — sign in with your new password.
+        </div>
+      )}
+
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
           {error}
+        </div>
+      )}
+
+      {emailUnconfirmed && (
+        <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm">
+          <p className="font-semibold text-amber-800 mb-1">Check your email first</p>
+          <p className="text-amber-700 mb-3">
+            We sent a confirmation link to <strong>{email || 'your email'}</strong>. Click it before signing in.
+          </p>
+          {resendSent ? (
+            <p className="text-green-700 font-medium">New email sent!</p>
+          ) : (
+            <button
+              onClick={handleResendConfirmation}
+              disabled={resendLoading}
+              className="text-amber-800 font-semibold underline hover:no-underline disabled:opacity-50"
+            >
+              {resendLoading ? 'Sending…' : 'Resend confirmation email'}
+            </button>
+          )}
         </div>
       )}
 
@@ -111,5 +180,13 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading…</div>}>
+      <LoginForm />
+    </Suspense>
   )
 }

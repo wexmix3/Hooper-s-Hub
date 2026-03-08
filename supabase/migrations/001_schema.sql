@@ -1,6 +1,18 @@
 -- Enable PostGIS for geospatial queries
 create extension if not exists postgis;
 
+-- ─── CLEAN SLATE (safe to re-run) ──────────────────────────────────────────
+drop trigger if exists on_auth_user_created on auth.users;
+drop table if exists public.run_messages cascade;
+drop table if exists public.run_participants cascade;
+drop table if exists public.runs cascade;
+drop table if exists public.crowd_reports cascade;
+drop table if exists public.reviews cascade;
+drop table if exists public.bookings cascade;
+drop table if exists public.time_slots cascade;
+drop table if exists public.courts cascade;
+drop table if exists public.profiles cascade;
+
 -- ─── PROFILES ──────────────────────────────────────────────────────────────────
 create table public.profiles (
   id uuid primary key default gen_random_uuid(),
@@ -213,6 +225,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists on_review_change on public.reviews;
 create trigger on_review_change
   after insert or update or delete on public.reviews
   for each row execute function update_court_rating();
@@ -237,6 +250,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists on_participant_change on public.run_participants;
 create trigger on_participant_change
   after insert or delete on public.run_participants
   for each row execute function update_run_spots();
@@ -255,6 +269,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function handle_new_user();
@@ -270,7 +285,15 @@ end;
 $$ language plpgsql security definer;
 
 -- ─── REALTIME ──────────────────────────────────────────────────────────────────
-alter publication supabase_realtime add table public.crowd_reports;
-alter publication supabase_realtime add table public.run_messages;
-alter publication supabase_realtime add table public.run_participants;
-alter publication supabase_realtime add table public.time_slots;
+do $$ begin
+  alter publication supabase_realtime add table public.crowd_reports;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.run_messages;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.run_participants;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.time_slots;
+exception when others then null; end $$;

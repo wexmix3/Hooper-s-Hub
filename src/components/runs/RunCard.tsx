@@ -20,6 +20,8 @@ const SKILL_COLORS: Record<string, 'success' | 'warning' | 'danger' | 'default'>
 export function RunCard({ run }: RunCardProps) {
   const spotsLeft = run.spots_total - run.spots_filled
   const isFull = run.status === 'full'
+  const organizerName = run.organizer?.display_name ?? run.organizer_name ?? 'Community'
+  const organizerInitial = organizerName[0].toUpperCase()
 
   return (
     <Link href={`/runs/${run.id}`} className="block group">
@@ -30,14 +32,14 @@ export function RunCard({ run }: RunCardProps) {
             {run.organizer?.avatar_url ? (
               <Image
                 src={run.organizer.avatar_url}
-                alt={run.organizer.display_name}
+                alt={organizerName}
                 width={40}
                 height={40}
                 className="rounded-full object-cover"
               />
             ) : (
               <div className="w-10 h-10 rounded-full bg-[#FF6B2C] flex items-center justify-center text-white font-bold">
-                {run.organizer?.display_name?.[0] ?? '?'}
+                {organizerInitial}
               </div>
             )}
           </div>
@@ -45,7 +47,7 @@ export function RunCard({ run }: RunCardProps) {
           {/* Content */}
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-slate-900 text-base leading-tight">{run.title}</h3>
-            <p className="text-xs text-slate-500 mt-0.5">{run.organizer?.display_name}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{organizerName}</p>
           </div>
 
           {/* Skill badge */}

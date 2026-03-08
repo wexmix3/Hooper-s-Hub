@@ -17,6 +17,8 @@ export default function SignupPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSent, setResendSent] = useState(false)
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
@@ -56,16 +58,40 @@ export default function SignupPage() {
     })
   }
 
+  async function handleResend() {
+    setResendLoading(true)
+    const supabase = createClient()
+    await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    })
+    setResendLoading(false)
+    setResendSent(true)
+  }
+
   if (success) {
     return (
       <div className="p-6 sm:p-8 text-center">
         <div className="text-5xl mb-4">📧</div>
         <h2 className="text-xl font-bold text-slate-900 mb-2">Check your email</h2>
-        <p className="text-slate-500 text-sm">
+        <p className="text-slate-500 text-sm mb-4">
           We sent a confirmation link to <strong>{email}</strong>. Click it to activate your account.
         </p>
-        <Link href="/login" className="block mt-6 text-[#FF6B2C] font-semibold text-sm">
-          Back to login
+        <p className="text-xs text-slate-400 mb-3">Didn&apos;t get it? Check spam or</p>
+        {resendSent ? (
+          <p className="text-green-600 font-medium text-sm">New email sent!</p>
+        ) : (
+          <button
+            onClick={handleResend}
+            disabled={resendLoading}
+            className="text-[#FF6B2C] font-semibold text-sm underline hover:no-underline disabled:opacity-50"
+          >
+            {resendLoading ? 'Sending…' : 'resend confirmation email'}
+          </button>
+        )}
+        <Link href="/login" className="block mt-6 text-slate-400 text-sm hover:text-slate-600">
+          Back to sign in
         </Link>
       </div>
     )

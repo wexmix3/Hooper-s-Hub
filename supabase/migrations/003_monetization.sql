@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS public.payouts (
 );
 
 ALTER TABLE public.payouts ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "Owners see own payouts"
+DROP POLICY IF EXISTS "Owners see own payouts" ON public.payouts;
+CREATE POLICY "Owners see own payouts"
   ON public.payouts FOR SELECT USING (auth.uid() = owner_id);
 
 -- Saved/favorite courts
@@ -42,17 +43,23 @@ CREATE TABLE IF NOT EXISTS public.saved_courts (
 );
 
 ALTER TABLE public.saved_courts ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "Users see own saves"
+DROP POLICY IF EXISTS "Users see own saves" ON public.saved_courts;
+CREATE POLICY "Users see own saves"
   ON public.saved_courts FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY IF NOT EXISTS "Users can save"
+DROP POLICY IF EXISTS "Users can save" ON public.saved_courts;
+CREATE POLICY "Users can save"
   ON public.saved_courts FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY IF NOT EXISTS "Users can unsave"
+DROP POLICY IF EXISTS "Users can unsave" ON public.saved_courts;
+CREATE POLICY "Users can unsave"
   ON public.saved_courts FOR DELETE USING (auth.uid() = user_id);
 
 -- Add to realtime publication
-ALTER PUBLICATION supabase_realtime ADD TABLE public.saved_courts;
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.saved_courts;
+EXCEPTION WHEN others THEN NULL; END $$;
 
 -- Slot hold as atomic RPC (race condition protection)
+DROP FUNCTION IF EXISTS public.hold_slot(uuid, uuid);
 CREATE OR REPLACE FUNCTION public.hold_slot(p_slot_id uuid, p_user_id uuid)
 RETURNS boolean
 LANGUAGE plpgsql
@@ -75,6 +82,7 @@ $$;
 
 -- Cron-style cleanup: release expired holds
 -- Call this via a pg_cron job or Supabase Edge Function scheduler
+DROP FUNCTION IF EXISTS public.release_expired_holds();
 CREATE OR REPLACE FUNCTION public.release_expired_holds()
 RETURNS integer
 LANGUAGE plpgsql
@@ -103,5 +111,6 @@ CREATE TABLE IF NOT EXISTS public.support_tickets (
 );
 
 ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "Anyone can submit support ticket"
+DROP POLICY IF EXISTS "Anyone can submit support ticket" ON public.support_tickets;
+CREATE POLICY "Anyone can submit support ticket"
   ON public.support_tickets FOR INSERT WITH CHECK (true);

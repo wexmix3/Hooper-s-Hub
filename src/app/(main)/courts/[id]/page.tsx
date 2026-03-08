@@ -13,6 +13,8 @@ import { BOROUGH_LABELS, formatPrice, timeAgo, isCrowdFresh } from "@/lib/utils"
 import { AMENITY_LABELS } from "@/types"
 import type { Metadata } from 'next'
 import { SaveCourtButton } from '@/components/courts/SaveCourtButton'
+import { ShareButton } from '@/components/ui/ShareButton'
+import { ComingSoonNotify } from '@/components/courts/ComingSoonNotify'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -31,7 +33,8 @@ export default async function CourtDetailPage({ params }: PageProps) {
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: court }, { data: latestCrowdData }] = await Promise.all([
+  const today = new Date().toISOString().split('T')[0]
+  const [{ data: court }, { data: latestCrowdData }, { data: upcomingRuns }] = await Promise.all([
     supabase.from('courts').select('*').eq('id', id).single(),
     supabase
       .from('crowd_reports')
@@ -40,6 +43,15 @@ export default async function CourtDetailPage({ params }: PageProps) {
       .order('reported_at', { ascending: false })
       .limit(1)
       .single(),
+    supabase
+      .from('runs')
+      .select('id, title, date, start_time, spots_total, spots_filled, skill_level, status, organizer:profiles!runs_organizer_id_fkey(display_name)')
+      .eq('court_id', id)
+      .in('status', ['open', 'full'])
+      .gte('date', today)
+      .order('date', { ascending: true })
+      .order('start_time', { ascending: true })
+      .limit(3),
   ])
 
   if (!court) notFound()
@@ -82,17 +94,20 @@ export default async function CourtDetailPage({ params }: PageProps) {
             <span>{c.address}</span>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
-            {c.avg_rating > 0 && (
-              <div className="flex items-center gap-1 text-slate-700">
-                <Star size={15} className="fill-amber-400 text-amber-400" />
-                <span className="font-semibold">{c.avg_rating.toFixed(1)}</span>
-                <span className="text-slate-400 text-sm">({c.review_count} reviews)</span>
-              </div>
-            )}
-            {c.is_bookable && c.hourly_rate && (
-              <span className="text-[#FF6B2C] font-bold">{formatPrice(c.hourly_rate)}/hr</span>
-            )}
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <div className="flex items-center gap-3 flex-wrap">
+              {c.avg_rating > 0 && (
+                <div className="flex items-center gap-1 text-slate-700">
+                  <Star size={15} className="fill-amber-400 text-amber-400" />
+                  <span className="font-semibold">{c.avg_rating.toFixed(1)}</span>
+                  <span className="text-slate-400 text-sm">({c.review_count} reviews)</span>
+                </div>
+              )}
+              {c.is_bookable && c.hourly_rate && (
+                <span className="text-[#FF6B2C] font-bold">{formatPrice(c.hourly_rate)}/hr</span>
+              )}
+            </div>
+            <ShareButton title={c.name} />
           </div>
         </div>
 
@@ -146,13 +161,53 @@ export default async function CourtDetailPage({ params }: PageProps) {
           </div>
         )}
 
-        {/* Booking calendar (private courts) */}
-        {c.is_bookable && (
+        {/* Booking section (private courts) */}
+        {c.is_bookable && c.booking_status === 'coming_soon' && (
+          <ComingSoonNotify courtName={c.name} hourlyRate={c.hourly_rate} />
+        )}
+        {c.is_bookable && c.booking_status !== 'coming_soon' && (
           <div>
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-bold text-slate-900">Available Times</h2>
             </div>
             <AvailabilityCalendar courtId={id} />
+          </div>
+        )}
+
+        {/* Upcoming runs at this court */}
+        {upcomingRuns && upcomingRuns.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-bold text-slate-900">Upcoming Runs Here</h2>
+              <Link href={`/runs?court=${id}`} className="text-sm text-[#FF6B2C] font-semibold">
+                See all
+              </Link>
+            </div>
+            <div className="space-y-2">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {upcomingRuns.map((run: any) => (
+                <Link
+                  key={run.id}
+                  href={`/runs/${run.id}`}
+                  className="flex items-center justify-between bg-white rounded-xl px-4 py-3 border border-slate-100 active:scale-[0.99] transition-transform"
+                >
+                  <div>
+                    <p className="font-semibold text-slate-900 text-sm">{run.title}</p>
+                    <p className="text-xs text-slate-500">
+                      {new Date(run.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      {' · '}
+                      {run.start_time.slice(0, 5).replace(/^0/, '')}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-xs font-semibold ${run.status === 'full' ? 'text-red-500' : 'text-green-600'}`}>
+                      {run.spots_filled}/{run.spots_total} spots
+                    </p>
+                    <p className="text-xs text-slate-400 capitalize">{run.skill_level}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 

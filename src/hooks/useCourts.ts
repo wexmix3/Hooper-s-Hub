@@ -16,6 +16,42 @@ export function useCourts(filters: CourtFilters, userCoords?: { lat: number; lng
 
     try {
       const supabase = createClient()
+
+      // Date+time availability filter: only show courts with an open slot at the chosen hour
+      if (filters.bookable && filters.availableDate && filters.availableHour !== undefined) {
+        const startTime = `${String(filters.availableHour).padStart(2, '0')}:00:00`
+        const { data: slots, error: slotErr } = await supabase
+          .from('time_slots')
+          .select('court_id')
+          .eq('date', filters.availableDate)
+          .eq('start_time', startTime)
+          .eq('status', 'available')
+        if (slotErr) throw slotErr
+
+        const courtIds = Array.from(new Set((slots ?? []).map((s: { court_id: string }) => s.court_id)))
+        if (courtIds.length === 0) {
+          setCourts([])
+          setLoading(false)
+          return
+        }
+
+        let q = supabase.from('courts').select('*').in('id', courtIds).order('name')
+        if (filters.borough !== 'all') q = q.eq('borough', filters.borough)
+        if (filters.indoor !== null && filters.indoor !== undefined) q = q.eq('indoor', filters.indoor)
+        const { data, error: courtErr } = await q
+        if (courtErr) throw courtErr
+
+        let result = (data as Court[]) ?? []
+        if (userCoords) {
+          result = result
+            .map((c) => ({ ...c, distance_miles: haversineDistance(userCoords.lat, userCoords.lng, c.lat, c.lng) }))
+            .sort((a, b) => (a.distance_miles ?? 999) - (b.distance_miles ?? 999))
+        }
+        setCourts(result)
+        setLoading(false)
+        return
+      }
+
       let query = supabase
         .from('courts')
         .select('*')
@@ -52,7 +88,7 @@ export function useCourts(filters: CourtFilters, userCoords?: { lat: number; lng
     } finally {
       setLoading(false)
     }
-  }, [filters.borough, filters.indoor, filters.bookable, userCoords?.lat, userCoords?.lng])
+  }, [filters.borough, filters.indoor, filters.bookable, filters.availableDate, filters.availableHour, userCoords?.lat, userCoords?.lng])
 
   useEffect(() => {
     fetchCourts()

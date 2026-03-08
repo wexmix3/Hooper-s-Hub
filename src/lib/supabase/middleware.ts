@@ -31,13 +31,14 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  // Protected routes that require auth
-  const protectedPaths = ['/(main)', '/map', '/browse', '/runs', '/profile', '/courts']
-  const isProtected = protectedPaths.some((p) => pathname.startsWith(p))
+  // Routes that strictly require authentication
+  const protectedPaths = ['/profile', '/runs/create']
+  const isProtected = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    url.searchParams.set('redirect', pathname)
     return NextResponse.redirect(url)
   }
 
@@ -45,6 +46,7 @@ export async function updateSession(request: NextRequest) {
   if ((pathname === '/login' || pathname === '/signup') && user) {
     const url = request.nextUrl.clone()
     url.pathname = '/map'
+    url.search = ''
     return NextResponse.redirect(url)
   }
 

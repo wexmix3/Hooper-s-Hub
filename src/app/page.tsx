@@ -1,9 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { MapPin, Target, CalendarCheck, Map, Users, Zap, Star, ChevronDown, ChevronUp, Instagram, Twitter, Building2, CreditCard, RefreshCw } from 'lucide-react'
 import { Logo } from '@/components/brand/Logo'
+import { LiveBadge } from '@/components/home/LiveBadge'
+import { CourtCount } from '@/components/home/CourtCount'
+import { FeaturedCourts } from '@/components/home/FeaturedCourts'
 
 const BOROUGHS = [
   { slug: 'manhattan', name: 'Manhattan', emoji: '🗽' },
@@ -57,22 +62,45 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function LandingPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setIsLoggedIn(true)
+    })
+  }, [])
+
   return (
     <div className="min-h-screen bg-white font-body">
 
       {/* ── Nav ─────────────────────────────────────────────────────────── */}
       <nav className="bg-white/90 backdrop-blur-sm border-b border-slate-100 px-5 py-3.5 flex items-center justify-between sticky top-0 z-50">
-        <Logo size={28} />
+        <Link href="/"><Logo size={28} /></Link>
         <div className="flex items-center gap-3">
-          <Link href="/login" className="text-slate-600 text-sm font-medium hover:text-slate-900 hidden sm:block">
-            Sign in
+          <Link href="/venue-signup" className="text-slate-500 text-sm font-medium hover:text-slate-900 hidden md:block">
+            List your court
           </Link>
-          <Link
-            href="/signup"
-            className="bg-[#FF6B2C] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#E55A1F] transition-colors"
-          >
-            Get started
-          </Link>
+          {isLoggedIn ? (
+            <Link
+              href="/map"
+              className="bg-[#FF6B2C] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#E55A1F] transition-colors"
+            >
+              Open app →
+            </Link>
+          ) : (
+            <>
+              <Link href="/login" className="text-slate-600 text-sm font-medium hover:text-slate-900 hidden sm:block">
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                className="bg-[#FF6B2C] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#E55A1F] transition-colors"
+              >
+                Get started
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -87,8 +115,11 @@ export default function LandingPage() {
           <div className="flex justify-center mb-8">
             <Logo size={48} dark />
           </div>
-          <div className="inline-flex items-center gap-2 bg-[#FF6B2C]/20 text-[#FF6B2C] rounded-full px-4 py-2 text-sm font-semibold mb-6 border border-[#FF6B2C]/30">
+          <div className="inline-flex items-center gap-2 bg-[#FF6B2C]/20 text-[#FF6B2C] rounded-full px-4 py-2 text-sm font-semibold mb-3 border border-[#FF6B2C]/30">
             🏀 Now live in all 5 boroughs
+          </div>
+          <div className="mb-6">
+            <LiveBadge />
           </div>
           <h1 className="font-display text-4xl sm:text-5xl font-extrabold leading-tight mb-5 text-white">
             Every Court in NYC.
@@ -113,43 +144,20 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          {/* Map mockup */}
+          {/* Court photo */}
           <div className="mt-12 mx-auto max-w-2xl rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-            <div
-              className="w-full h-64 relative"
-              style={{ background: 'linear-gradient(135deg, #0d1b2a 0%, #1a2e44 50%, #0d1b2a 100%)' }}
-            >
-              {/* Simulated map grid */}
-              <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5" />
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#grid)" />
-              </svg>
-              {/* Simulated court dots */}
-              {[
-                { x: '25%', y: '40%', color: '#22c55e' },
-                { x: '42%', y: '55%', color: '#FF6B2C' },
-                { x: '58%', y: '35%', color: '#22c55e' },
-                { x: '70%', y: '60%', color: '#22c55e' },
-                { x: '35%', y: '65%', color: '#FF6B2C' },
-                { x: '80%', y: '45%', color: '#22c55e' },
-                { x: '15%', y: '55%', color: '#22c55e' },
-                { x: '50%', y: '75%', color: '#22c55e' },
-                { x: '63%', y: '25%', color: '#FF6B2C' },
-              ].map((dot, i) => (
-                <div
-                  key={i}
-                  className="absolute w-3 h-3 rounded-full shadow-lg"
-                  style={{ left: dot.x, top: dot.y, background: dot.color, transform: 'translate(-50%,-50%)', boxShadow: `0 0 8px ${dot.color}` }}
-                />
-              ))}
+            <div className="relative h-64 w-full">
+              <Image
+                src="https://images.unsplash.com/photo-1546519638405-a9c0d51ca0b7?w=1200&q=80"
+                alt="NYC basketball court"
+                fill
+                className="object-cover"
+                unoptimized
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-3 py-1.5 rounded-lg backdrop-blur-sm">
-                🏀 342 courts across NYC
+                🏀 <CourtCount />
               </div>
-              {/* TODO: Replace with real screenshot */}
             </div>
           </div>
         </div>
@@ -197,6 +205,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      <FeaturedCourts />
 
       {/* ── Features Grid ───────────────────────────────────────────────── */}
       <section className="px-5 py-16 max-w-4xl mx-auto">

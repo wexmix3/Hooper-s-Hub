@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, MapPin, Clock, Users, MessageCircle } from 'lucide-react'
+import { ShareButton } from '@/components/ui/ShareButton'
 import { createClient } from '@/lib/supabase/client'
 import { useRun } from '@/hooks/useRuns'
 import { Button } from '@/components/ui/Button'
@@ -79,6 +80,7 @@ export default function RunDetailPage({ params }: PageProps) {
           <ArrowLeft size={20} className="text-slate-600" />
         </Link>
         <h1 className="text-lg font-bold text-slate-900 flex-1 truncate">{run.title}</h1>
+        <ShareButton title={run.title} />
         <Badge
           variant={
             run.skill_level === 'beginner' ? 'success' :

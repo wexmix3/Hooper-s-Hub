@@ -25,17 +25,29 @@ const SKILLS: Array<{ value: SkillLevel | 'all'; label: string }> = [
   { value: 'advanced', label: 'Advanced' },
 ]
 
+function todayStr() {
+  return new Date().toISOString().split('T')[0]
+}
+
 export default function RunsPage() {
   const [filters, setFilters] = useState<RunFilters>({ borough: 'all', skill_level: 'all' })
   const { runs, loading, error } = useRuns(filters)
 
-  function chip(active: boolean) {
+  const isToday = filters.date === todayStr()
+
+  function chip(active: boolean, orange = false) {
     return cn(
       'flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-200',
       active
-        ? 'bg-[#FF6B2C] text-white border-[#FF6B2C]'
+        ? orange
+          ? 'bg-[#FF6B2C] text-white border-[#FF6B2C]'
+          : 'bg-[#1B3A5C] text-white border-[#1B3A5C]'
         : 'bg-white text-slate-600 border-slate-200'
     )
+  }
+
+  function toggleToday() {
+    setFilters((f) => ({ ...f, date: isToday ? undefined : todayStr() }))
   }
 
   return (
@@ -53,12 +65,16 @@ export default function RunsPage() {
           </Link>
         </div>
 
-        {/* Borough filter */}
+        {/* Date + Borough filter */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          <button className={chip(isToday, true)} onClick={toggleToday}>
+            Today
+          </button>
+          <div className="w-px h-8 bg-slate-200 self-center flex-shrink-0" />
           {BOROUGHS.map((b) => (
             <button
               key={b.value}
-              className={chip(filters.borough === b.value)}
+              className={chip(filters.borough === b.value, true)}
               onClick={() => setFilters((f) => ({ ...f, borough: b.value }))}
             >
               {b.label}
@@ -71,7 +87,7 @@ export default function RunsPage() {
           {SKILLS.map((s) => (
             <button
               key={s.value}
-              className={chip(filters.skill_level === s.value)}
+              className={chip(filters.skill_level === s.value, true)}
               onClick={() => setFilters((f) => ({ ...f, skill_level: s.value }))}
             >
               {s.label}

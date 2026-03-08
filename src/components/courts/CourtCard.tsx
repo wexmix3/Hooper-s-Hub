@@ -26,17 +26,26 @@ export function CourtCard({ court }: CourtCardProps) {
               alt={court.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
+              unoptimized
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-slate-400">
-              <span className="text-5xl">🏀</span>
+            <div className="flex items-center justify-center h-full text-slate-400 bg-slate-100">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" className="opacity-30">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                <path d="M12 2C16 6 16 10 12 12C8 14 8 18 12 22" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                <line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" strokeWidth="1.5"/>
+              </svg>
             </div>
           )}
-          {/* Type badge */}
-          <div className="absolute top-2 left-2">
-            <Badge variant={court.type === 'private' ? 'info' : 'success'}>
-              {court.type === 'private' ? 'Private' : 'Public'}
-            </Badge>
+          {/* Badges */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {court.booking_status === 'coming_soon' ? (
+              <Badge variant="warning">Coming Soon</Badge>
+            ) : (
+              <Badge variant={court.type === 'private' ? 'info' : 'success'}>
+                {court.type === 'private' ? 'Private' : 'Public'}
+              </Badge>
+            )}
           </div>
           {court.indoor && (
             <div className="absolute top-2 right-2">
@@ -47,7 +56,10 @@ export function CourtCard({ court }: CourtCardProps) {
 
         {/* Content */}
         <div className="p-4">
-          <h3 className="font-bold text-slate-900 text-base leading-tight mb-1">{court.name}</h3>
+          <h3 className="font-bold text-slate-900 text-base leading-tight mb-0.5">{court.name}</h3>
+          {court.neighborhood && (
+            <p className="text-xs text-slate-400 mb-1">{court.neighborhood}</p>
+          )}
 
           <div className="flex items-center gap-1 text-sm text-slate-500 mb-2">
             <MapPin size={12} />

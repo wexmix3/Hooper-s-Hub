@@ -14,6 +14,11 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 const CLUSTER_LAYER_ID = 'clusters'
 const UNCLUSTERED_LAYER_ID = 'unclustered-point'
 
+function basketballSvgUrl(color: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="${color}" stroke="white" stroke-width="2"/><path d="M12 1 C16 5 16 10 12 12 C8 14 8 19 12 23" stroke="black" stroke-opacity="0.2" stroke-width="1.5" fill="none"/><line x1="1" y1="12" x2="23" y2="12" stroke="black" stroke-opacity="0.2" stroke-width="1.5"/></svg>`
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`
+}
+
 export function CourtMap() {
   const mapRef = useRef<MapRef>(null)
   const { coords } = useGeolocation()
@@ -91,6 +96,22 @@ export function CourtMap() {
     [courts]
   )
 
+  // Load basketball icon sprites into Mapbox
+  const onMapLoad = useCallback(() => {
+    const map = mapRef.current?.getMap()
+    if (!map) return
+    const icons: Array<[string, string]> = [
+      ['basketball-bookable', '#FF6B2C'],
+      ['basketball-public', '#22C55E'],
+    ]
+    for (const [name, color] of icons) {
+      if (map.hasImage(name)) continue
+      const img = new Image(24, 24)
+      img.src = basketballSvgUrl(color)
+      img.onload = () => { if (!map.hasImage(name)) map.addImage(name, img) }
+    }
+  }, [])
+
   // Center on user location when available
   useEffect(() => {
     if (coords && mapRef.current) {
@@ -128,6 +149,7 @@ export function CourtMap() {
         onMouseLeave={() => setCursor('grab')}
         cursor={cursor}
         interactiveLayerIds={[CLUSTER_LAYER_ID, UNCLUSTERED_LAYER_ID]}
+        onLoad={onMapLoad}
       >
         {/* Controls */}
         <GeolocateControl
@@ -177,20 +199,20 @@ export function CourtMap() {
             }}
             paint={{ 'text-color': '#fff' }}
           />
-          {/* Individual court points */}
+          {/* Individual court points — basketball icon */}
           <Layer
             id={UNCLUSTERED_LAYER_ID}
-            type="circle"
+            type="symbol"
             filter={['!', ['has', 'point_count']]}
-            paint={{
-              'circle-color': [
+            layout={{
+              'icon-image': [
                 'case',
-                ['==', ['get', 'is_bookable'], true], '#1B3A5C',
-                '#22C55E',
+                ['==', ['get', 'is_bookable'], true], 'basketball-bookable',
+                'basketball-public',
               ],
-              'circle-radius': 9,
-              'circle-stroke-width': 2.5,
-              'circle-stroke-color': '#fff',
+              'icon-size': 1,
+              'icon-allow-overlap': true,
+              'icon-ignore-placement': true,
             }}
           />
           {/* Court name labels at high zoom */}
@@ -231,7 +253,7 @@ export function CourtMap() {
           Public courts
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#1B3A5C]" />
+          <div className="w-3 h-3 rounded-full bg-[#FF6B2C]" />
           Private / Bookable
         </div>
       </div>

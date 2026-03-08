@@ -8,6 +8,17 @@ export interface Profile {
   skill_level: 'beginner' | 'intermediate' | 'advanced' | 'any'
   borough: string | null
   created_at: string
+  // Added in migration 005
+  position?: 'point_guard' | 'shooting_guard' | 'small_forward' | 'power_forward' | 'center' | 'any'
+  play_style?: 'competitive' | 'casual' | 'both'
+  preferred_court_type?: 'indoor' | 'outdoor' | 'both'
+  preferred_time?: 'early_morning' | 'morning' | 'afternoon' | 'evening' | 'night' | 'any'
+  bio?: string | null
+  onboarding_completed?: boolean
+  runs_joined?: number
+  runs_organized?: number
+  // Added in migration 003
+  is_venue_owner?: boolean
 }
 
 export type CourtType = 'public' | 'private'
@@ -40,6 +51,10 @@ export interface Court {
   review_count: number
   created_at: string
   updated_at: string
+  // Added in migration 004
+  neighborhood?: string
+  booking_status?: 'active' | 'coming_soon'
+  num_courts?: number
   // Computed client-side
   distance_miles?: number
   latest_crowd?: CrowdReport | null
@@ -103,7 +118,7 @@ export interface CrowdReport {
 export interface Run {
   id: string
   court_id: string
-  organizer_id: string
+  organizer_id: string | null
   title: string
   date: string // YYYY-MM-DD
   start_time: string
@@ -114,6 +129,8 @@ export interface Run {
   description: string | null
   status: 'open' | 'full' | 'cancelled' | 'completed'
   created_at: string
+  // Added in migration 004 — display name for seeded/demo runs
+  organizer_name?: string | null
   // Joined
   court?: Court
   organizer?: Profile
@@ -144,6 +161,8 @@ export interface CourtFilters {
   indoor: boolean | null
   bookable: boolean | null
   query?: string
+  availableDate?: string   // YYYY-MM-DD, only relevant when bookable=true
+  availableHour?: number   // 6-21 hour, only relevant when bookable=true
 }
 
 export interface RunFilters {

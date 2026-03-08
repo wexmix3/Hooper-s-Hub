@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Building2, CheckCircle2, CreditCard } from 'lucide-react'
@@ -64,6 +64,14 @@ export default function VenueSignupPage() {
   const [amenities, setAmenities] = useState<string[]>(['restroom', 'water_fountain'])
   const [description, setDescription] = useState('')
   const [hourlyRate, setHourlyRate] = useState('')
+
+  // Auto-skip Step 1 if user is already signed in
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setStep(2)
+    })
+  }, [])
 
   function toggleAmenity(id: string) {
     setAmenities((prev) =>
