@@ -2,13 +2,15 @@
 
 import { useState } from 'react'
 import { Bell, CheckCircle } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface ComingSoonNotifyProps {
   courtName: string
+  courtId?: string
   hourlyRate?: number | null
 }
 
-export function ComingSoonNotify({ courtName, hourlyRate }: ComingSoonNotifyProps) {
+export function ComingSoonNotify({ courtName, courtId, hourlyRate }: ComingSoonNotifyProps) {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -17,10 +19,15 @@ export function ComingSoonNotify({ courtName, hourlyRate }: ComingSoonNotifyProp
     e.preventDefault()
     if (!email) return
     setLoading(true)
-    // Simulate a brief network delay
-    await new Promise((r) => setTimeout(r, 600))
+    const supabase = createClient()
+    const { error } = await supabase.from('waitlist').insert({
+      email: email.trim().toLowerCase(),
+      feature: 'booking',
+      court_id: courtId ?? null,
+    })
+    // 23505 = unique violation (already signed up) — treat as success
+    if (!error || error.code === '23505') setSubmitted(true)
     setLoading(false)
-    setSubmitted(true)
   }
 
   return (

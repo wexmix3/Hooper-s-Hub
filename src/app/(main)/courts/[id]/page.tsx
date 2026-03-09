@@ -163,7 +163,7 @@ export default async function CourtDetailPage({ params }: PageProps) {
 
         {/* Booking section (private courts) */}
         {c.is_bookable && c.booking_status === 'coming_soon' && (
-          <ComingSoonNotify courtName={c.name} hourlyRate={c.hourly_rate} />
+          <ComingSoonNotify courtName={c.name} courtId={c.id} hourlyRate={c.hourly_rate} />
         )}
         {c.is_bookable && c.booking_status !== 'coming_soon' && (
           <div>

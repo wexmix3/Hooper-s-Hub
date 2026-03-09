@@ -11,11 +11,11 @@ import { CourtCount } from '@/components/home/CourtCount'
 import { FeaturedCourts } from '@/components/home/FeaturedCourts'
 
 const BOROUGHS = [
-  { slug: 'manhattan', name: 'Manhattan', emoji: '🗽' },
-  { slug: 'brooklyn', name: 'Brooklyn', emoji: '🌉' },
-  { slug: 'queens', name: 'Queens', emoji: '✈️' },
-  { slug: 'bronx', name: 'The Bronx', emoji: '🎤' },
-  { slug: 'staten-island', name: 'Staten Island', emoji: '⛴️' },
+  { slug: 'manhattan', name: 'Manhattan', filterValue: 'manhattan' },
+  { slug: 'brooklyn', name: 'Brooklyn', filterValue: 'brooklyn' },
+  { slug: 'queens', name: 'Queens', filterValue: 'queens' },
+  { slug: 'bronx', name: 'The Bronx', filterValue: 'bronx' },
+  { slug: 'staten-island', name: 'Staten Island', filterValue: 'staten_island' },
 ]
 
 const FAQS = [
@@ -127,11 +127,11 @@ export default function LandingPage() {
             <span className="text-[#FF6B2C]">One App.</span>
           </h1>
           <p className="text-blue-200 text-lg mb-8 leading-relaxed max-w-xl mx-auto">
-            Find public parks, book private gyms, check crowd levels, and organize runs with NYC ballers.
+            Find public parks, browse bookable indoor gyms, and organize pickup runs with NYC ballers.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href="/signup"
+              href="/browse"
               className="bg-[#FF6B2C] text-white font-bold px-8 py-4 rounded-xl text-lg hover:bg-[#E55A1F] transition-colors"
             >
               Find courts near you →
@@ -184,13 +184,13 @@ export default function LandingPage() {
                 num: '02',
                 icon: <Target size={28} className="text-[#FF6B2C]" />,
                 title: 'Pick your spot',
-                desc: 'Check real-time crowd levels, read reviews, see surface type, lights, and amenities.',
+                desc: 'See surface type, number of courts, lights, amenities, and neighborhood info for every court.',
               },
               {
                 num: '03',
                 icon: <CalendarCheck size={28} className="text-[#FF6B2C]" />,
                 title: 'Book or just show up',
-                desc: 'Reserve a private court in seconds, or join a pickup run at any public park.',
+                desc: 'See which private courts are bookable, or join a pickup run at any public park.',
               },
             ].map((step) => (
               <div key={step.num} className="relative bg-white rounded-2xl p-7 border border-slate-100 shadow-sm">
@@ -217,8 +217,8 @@ export default function LandingPage() {
         <div className="grid sm:grid-cols-2 gap-5">
           {[
             { icon: <Map size={26} className="text-[#FF6B2C]" />, title: 'Unified Court Map', desc: 'Every public NYC Parks court + private bookable gyms. No more bouncing between apps.' },
-            { icon: <Users size={26} className="text-[#FF6B2C]" />, title: 'Live Crowd Reports', desc: 'Community-powered crowd levels for public courts. Know before you go.' },
-            { icon: <Zap size={26} className="text-[#FF6B2C]" />, title: 'Instant Booking', desc: 'Book private courts in seconds. Secure payment, instant confirmation.' },
+            { icon: <Users size={26} className="text-[#FF6B2C]" />, title: 'Live Crowd Reports', desc: 'Check in at courts to share crowd levels with the community. The more hoopers join, the better it gets.' },
+            { icon: <Zap size={26} className="text-[#FF6B2C]" />, title: 'Instant Booking', desc: 'Browse bookable private courts across NYC. Online booking coming soon.' },
             { icon: <Star size={26} className="text-[#FF6B2C]" />, title: 'Pickup Runs', desc: 'Create or join runs at any court. Chat, track spots, and never play 4-on-4 again.' },
           ].map((f) => (
             <div
@@ -255,9 +255,9 @@ export default function LandingPage() {
           </div>
           <div className="space-y-5">
             {[
-              { icon: <RefreshCw size={20} className="text-[#FF6B2C]" />, title: 'Real-time calendar sync', desc: 'Your availability updates instantly. No manual work.' },
-              { icon: <CreditCard size={20} className="text-[#FF6B2C]" />, title: 'Automatic payments via Stripe', desc: 'Get paid directly. We handle all the billing.' },
-              { icon: <Users size={20} className="text-[#FF6B2C]" />, title: 'Reach thousands of local players', desc: 'Tap into NYC\'s basketball community — no ads needed.' },
+              { icon: <RefreshCw size={20} className="text-[#FF6B2C]" />, title: 'Simple availability management', desc: 'Set your open hours and let players find you.' },
+              { icon: <CreditCard size={20} className="text-[#FF6B2C]" />, title: 'Easy payment setup', desc: 'Stripe integration coming soon — get notified when it\'s live.' },
+              { icon: <Users size={20} className="text-[#FF6B2C]" />, title: 'Get discovered by NYC ballers', desc: 'Players searching for courts near you will find your venue.' },
             ].map((item) => (
               <div key={item.title} className="flex items-start gap-4 bg-white p-4 rounded-xl border border-slate-100">
                 <div className="p-2 bg-orange-50 rounded-lg flex-shrink-0">{item.icon}</div>
@@ -281,11 +281,10 @@ export default function LandingPage() {
           {BOROUGHS.map((b) => (
             <Link
               key={b.slug}
-              href={`/${b.slug}`}
-              className="flex items-center gap-2 px-6 py-3.5 bg-white border border-slate-200 text-slate-900 font-semibold rounded-xl hover:bg-[#1B3A5C] hover:text-white hover:border-[#1B3A5C] transition-all duration-200 shadow-sm"
+              href={`/browse?borough=${b.filterValue}`}
+              className="px-6 py-3.5 bg-white border border-slate-200 text-slate-900 font-semibold rounded-xl hover:bg-[#1B3A5C] hover:text-white hover:border-[#1B3A5C] transition-all duration-200 shadow-sm"
             >
-              <span>{b.emoji}</span>
-              <span>{b.name}</span>
+              {b.name}
             </Link>
           ))}
         </div>

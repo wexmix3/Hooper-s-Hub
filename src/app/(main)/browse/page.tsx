@@ -1,7 +1,9 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useState } from 'react'
 import { Search, Calendar, Clock, X } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 import { Input } from '@/components/ui/Input'
 import { CourtCard } from '@/components/courts/CourtCard'
 import { CourtCardSkeleton } from '@/components/ui/Skeleton'
@@ -19,6 +21,8 @@ const BOROUGHS: Array<{ value: Borough | 'all'; label: string }> = [
   { value: 'staten_island', label: 'S. Island' },
 ]
 
+const VALID_BOROUGH_VALUES = BOROUGHS.map((b) => b.value)
+
 const HOURS = Array.from({ length: 16 }, (_, i) => {
   const h = i + 6
   const label = h === 12 ? '12 PM' : h < 12 ? `${h} AM` : `${h - 12} PM`
@@ -29,9 +33,15 @@ function todayStr() {
   return new Date().toISOString().split('T')[0]
 }
 
-export default function BrowsePage() {
+function BrowseContent() {
   const { coords } = useGeolocation()
-  const [filters, setFilters] = useState<CourtFilters>({ borough: 'all', indoor: null, bookable: null })
+  const searchParams = useSearchParams()
+  const boroughParam = searchParams.get('borough') ?? 'all'
+  const initialBorough = VALID_BOROUGH_VALUES.includes(boroughParam as Borough | 'all')
+    ? (boroughParam as Borough | 'all')
+    : 'all'
+
+  const [filters, setFilters] = useState<CourtFilters>({ borough: initialBorough, indoor: null, bookable: null })
   const [query, setQuery] = useState('')
   const [showDatePicker, setShowDatePicker] = useState(false)
   const { courts, loading, error } = useCourts(filters, coords)
@@ -109,7 +119,6 @@ export default function BrowsePage() {
           </button>
         </div>
 
-        {/* Date/time availability — only shown when Bookable is on */}
         {filters.bookable && (
           <div className="space-y-2">
             {!showDatePicker && !hasDateFilter && (
@@ -204,5 +213,13 @@ export default function BrowsePage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function BrowsePage() {
+  return (
+    <Suspense>
+      <BrowseContent />
+    </Suspense>
   )
 }
